@@ -2,6 +2,9 @@
   <img width="200" src="https://open-wc.org/hero.png"></img>
 </p>
 
+![image](https://user-images.githubusercontent.com/9094815/110838909-4c850c00-82a3-11eb-86d6-8d8c819622fa.png)
+
+
 ## Open-wc Starter App
 
 [![Built with open-wc recommendations](https://img.shields.io/badge/built%20with-open--wc-blue.svg)](https://github.com/open-wc)
