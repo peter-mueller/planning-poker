@@ -1,6 +1,11 @@
-import { css, html, LitElement } from "lit-element";
+import { css, html, LitElement, property } from "lit-element";
+import { PokerrundeAggregate } from "./api/Pokerrunde";
 
 export class PokerTable extends LitElement {
+
+    @property({type: PokerrundeAggregate})
+    pokerrunde: PokerrundeAggregate = new PokerrundeAggregate();
+
     static styles = css`
         :host {
             display: block;
@@ -57,16 +62,15 @@ export class PokerTable extends LitElement {
         return html`
             <div class="table">
                 <div class="toprow">
-                    <poker-card flipped mini number="0"></poker-card>
-                    <poker-card mini number="1"></poker-card>
-                    <poker-card unknown mini number="2"></poker-card>
-
+                    ${this.pokerrunde.mitspieler.filter((_, index) => index % 2 === 0).map(m => 
+                        html`<poker-card ?flipped=${!m.karte.aufgedeckt && m.karte.wert !== ""} ?unknown=${m.karte.wert === ""} mini value=${m.karte.wert}></poker-card>`
+                    )}
                 </div>
                 <div class="midline"></div>
                 <div class="bottomrow">
-                    <poker-card mini number="3"></poker-card>
-                    <poker-card mini number="5"></poker-card>
-                    <poker-card mini number="8"></poker-card>
+                    ${this.pokerrunde.mitspieler.filter((_, index) => index % 2 === 1).map(m => 
+                        html`<poker-card ?flipped=${!m.karte.aufgedeckt && m.karte.wert !== ""} ?unknown=${m.karte.wert === ""} mini value=${m.karte.wert}></poker-card>`
+                    )}
                 </div>
                 
                

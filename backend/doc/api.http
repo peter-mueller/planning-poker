@@ -1,0 +1,38 @@
+@baseUrl = http://localhost:8080
+
+### Pokerrunde erstellen
+# @name pokerrunde
+POST {{baseUrl}}/v1/api/pokerrunde
+Content-Type: 'application/json'
+
+{}
+
+### Pokerrunde lesen
+GET {{baseUrl}}/v1/api/pokerrunde/{{pokerrunde.response.body.$.id}}
+
+### Mitspieler erstellen
+# @name spieler
+POST {{baseUrl}}/v1/api/pokerrunde/{{pokerrunde.response.body.$.id}}/mitspieler
+Content-Type: 'application/json'
+
+{
+    "name": "Peter"
+}
+
+### Kartenwert eines Spielers setzen
+PUT {{baseUrl}}/v1/api/pokerrunde/{{pokerrunde.response.body.$.id}}/mitspieler/{{spieler.response.body.$.id}}/karte/wert
+Content-Type: 'application/json'
+
+"KarteWert1"
+
+### Alle Karten aufdecken
+POST {{baseUrl}}/v1/api/pokerrunde/{{pokerrunde.response.body.$.id}}/command/aufdecken
+Content-Type: 'application/json'
+
+{}
+
+### Karten zurücksetzen
+POST {{baseUrl}}/v1/api/pokerrunde/{{pokerrunde.response.body.$.id}}/command/reset
+Content-Type: 'application/json'
+
+{}

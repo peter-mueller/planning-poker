@@ -2,9 +2,9 @@ import { css, html, LitElement, property } from "lit-element";
 
 export class PokerCard extends LitElement {
 
-    @property({type: Number})
-    private number = 0;
-    @property({type: Boolean, reflect: true})
+    @property({ type: String })
+    private value = "0";
+    @property({ type: Boolean, reflect: true })
     private unknown = false;
 
     static styles = css`
@@ -14,7 +14,9 @@ export class PokerCard extends LitElement {
             color: inherit;
         }
         .card {
+
             cursor: pointer;
+            user-select: none;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -34,9 +36,16 @@ export class PokerCard extends LitElement {
 
         }
 
-
         .card:hover {
-            color: var(--accent-color, blue);
+            background: linear-gradient(
+                135deg,
+                #efefef 0%,
+                #efefef 20%,
+                white 20%,
+                white 80%,
+                #efefef 80%,
+                #efefef 100%
+            );
         }
 
 
@@ -44,6 +53,12 @@ export class PokerCard extends LitElement {
             font-size: calc(42px * 1.5);
             transform: scaleX(0.8)
         }
+
+
+        .card:hover .number {
+            color: var(--accent-color, blue);
+        }
+
         .number.smallleft {
             position: absolute;
             top: 4px;
@@ -87,10 +102,10 @@ export class PokerCard extends LitElement {
             background: linear-gradient(
                 135deg,
                 var(--primary-color) 0%,
-                var(--primary-color) 15%,
-                white 15%,
-                white 85%,
-                var(--accent-color) 85%,
+                var(--primary-color) 20%,
+                white 20%,
+                white 80%,
+                var(--accent-color) 80%,
                 var(--accent-color) 100%
             );
         }
@@ -131,15 +146,15 @@ export class PokerCard extends LitElement {
     render() {
         return html`
             <div class="card">
-
-            ${this.unknown ? html`
-                    <div class="number">?</div>
+            
+                ${this.unknown ? html`
+                <div class="number">?</div>
                 ` : html`
-                    <div class="number">${this.number}</div>
-                    <div class="number smallleft">${this.number}</div>
-                    <div class="number smallright">${this.number}</div>
+                <div class="number">${this.value}</div>
+                <div class="number smallleft">${this.value}</div>
+                <div class="number smallright">${this.value}</div>
                 `
-        }
+                    }
             </div>
         `;
     }

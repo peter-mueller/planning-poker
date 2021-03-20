@@ -1,4 +1,6 @@
 // import { hmrPlugin, presets } from '@open-wc/dev-server-hmr';
+import proxy from 'koa-proxies';
+
 
 /** Use Hot Module replacement by adding --hmr to the start command */
 const hmr = process.argv.includes('--hmr');
@@ -18,6 +20,14 @@ export default /** @type {import('@web/dev-server').DevServerConfig} */ ({
   // nodeResolve: {
   //   exportConditions: ['browser', 'development']
   // },
+
+  middleware: [
+    proxy('/v1/api', {
+      target: 'http://localhost:8080',
+      changeOrigin: true,
+      secure: false
+    })
+  ],
 
   plugins: [
     /** Use Hot Module Replacement by uncommenting. Requires @open-wc/dev-server-hmr plugin */
