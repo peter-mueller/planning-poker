@@ -1,6 +1,7 @@
-<p align="center">
-  <img width="200" src="https://open-wc.org/hero.png"></img>
-</p>
+> :warning: Wanted: Backend
+
+![image](https://user-images.githubusercontent.com/9094815/110838909-4c850c00-82a3-11eb-86d6-8d8c819622fa.png)
+
 
 ## Open-wc Starter App
 
