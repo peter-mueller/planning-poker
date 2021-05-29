@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -41,7 +42,12 @@ func main() {
 		log.Panicln(err)
 	}
 
-	log.Fatal(http.ListenAndServe(":8080", router))
+	port, ok := os.LookupEnv("PORT")
+	if !ok {
+		port = "8080"
+	}
+	log.Printf("Starting on port: %s", port)
+	log.Fatal(http.ListenAndServe(":"+port, router))
 }
 
 func printAllRoutes(method string, route string, handler http.Handler, middlewares ...func(http.Handler) http.Handler) error {
