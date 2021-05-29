@@ -12,5 +12,6 @@ RUN npm run build
 FROM scratch
 COPY --from=go-build /bin/planning-poker /bin/planning-poker
 COPY --from=lit-build /web/dist/* /bin/static/
+WORKDIR /bin/
 EXPOSE 8080
 ENTRYPOINT ["/bin/planning-poker"]
