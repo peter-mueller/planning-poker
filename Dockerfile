@@ -6,6 +6,7 @@ RUN CGO_ENABLED=0 go build -o /bin/planning-poker
 FROM node:16-alpine AS lit-build
 WORKDIR /web/
 COPY ./frontend/ /web/
+RUN npm install
 RUN npm run build
 
 FROM scratch
