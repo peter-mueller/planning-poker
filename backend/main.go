@@ -16,7 +16,6 @@ func Routes() *chi.Mux {
 	router := chi.NewRouter()
 
 	router.Use(
-		render.SetContentType(render.ContentTypeJSON),
 		middleware.Logger,
 		middleware.RedirectSlashes,
 		middleware.Recoverer,
@@ -25,9 +24,13 @@ func Routes() *chi.Mux {
 	controller := pokerrunde.NewRestController(pokerrunde.NewRepository())
 
 	router.Route("/v1", func(r chi.Router) {
+		r.Use(
+			render.SetContentType(render.ContentTypeJSON),
+		)
 		r.Mount("/api/pokerrunde", controller.Routes())
 	})
 
+	router.Handle("/*", http.FileServer(http.Dir("./static/")))
 	return router
 }
 
