@@ -58,9 +58,9 @@ export class PlanningPoker extends LitElement {
       this.pokerrunde = new PokerrundeAggregate({
         mitspieler: [
           {id: "1", name: "H", karte: {aufgedeckt: true, wert: "H"}},
-          {id: "2", name: "E", karte: {aufgedeckt: true, wert: "💃"}},
+          {id: "2", name: "E", karte: {aufgedeckt: true, wert: "❄️"}},
           {id: "3", name: "I", karte: {aufgedeckt: true, wert: "I"}},
-          {id: "4", name: "L", karte: {aufgedeckt: true, wert: "🕺"}},
+          {id: "4", name: "L", karte: {aufgedeckt: true, wert: "🎁"}},
           {id: "5", name: "!", karte: {aufgedeckt: true, wert: "!"}},
         ],
         kartenwerte: ["", "?", ":-)", "1", "2","3","4", "XX", "☕"]
