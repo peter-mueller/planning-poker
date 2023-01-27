@@ -42,7 +42,7 @@ func main() {
 		log.Panicln(err)
 	}
 
-	port, ok := os.LookupEnv("PORT")
+	port, ok := os.LookupEnv("PLANNINGPOKER_PORT")
 	if !ok {
 		port = "8080"
 	}

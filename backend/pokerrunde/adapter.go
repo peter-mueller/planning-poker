@@ -68,9 +68,6 @@ func (c *RESTController) PostAPokerrunde(w http.ResponseWriter, r *http.Request)
 }
 
 func (s Spieler) Bind(r *http.Request) error {
-	if s.Name == "" {
-		return errors.New("Name ist ein Pflichtfeld, bitte Namen angeben")
-	}
 	return nil
 }
 
