@@ -189,7 +189,7 @@ export class PokerCard extends TemplatedElement {
             this.removeAttribute('unknown')
         }
 
-        if (karte.aufgedeckt) {
+        if (karte.aufgedeckt || karte.wert === "") {
             this.removeAttribute('flipped')
         } else {
             this.setAttribute('flipped', '')

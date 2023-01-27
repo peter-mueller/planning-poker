@@ -1,6 +1,8 @@
 package main
 
 import (
+	"embed"
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
@@ -11,6 +13,9 @@ import (
 
 	"github.com/go-chi/render"
 )
+
+//go:embed static/*
+var static embed.FS
 
 // Routes sind alle Routen für diesen Service
 func Routes() *chi.Mux {
@@ -31,7 +36,12 @@ func Routes() *chi.Mux {
 		r.Mount("/api/pokerrunde", controller.Routes())
 	})
 
-	router.Handle("/*", http.FileServer(http.Dir("./static/")))
+	content, err := fs.Sub(static, "static")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	router.Handle("/*", http.FileServer(http.FS(content)))
 	return router
 }
 

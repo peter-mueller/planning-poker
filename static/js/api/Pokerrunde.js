@@ -62,9 +62,10 @@ export class Karte {
     aufgedeckt = false
     /** @type {Kartenwert} */
     wert = ""
+    
     /**
- * @param {any} data 
- */
+     * @param {any} data 
+     */
     unmarshalJson(data) {
         this.aufgedeckt = data.aufgedeckt;
         this.wert = data.wert;
