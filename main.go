@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -17,17 +18,20 @@ import (
 //go:embed static/*
 var static embed.FS
 
+type Server struct {
+	repo *pokerrunde.Repository
+}
+
 // Routes sind alle Routen für diesen Service
-func Routes() *chi.Mux {
+func (s *Server) Routes() *chi.Mux {
 	router := chi.NewRouter()
 
 	router.Use(
-		middleware.Logger,
 		middleware.RedirectSlashes,
 		middleware.Recoverer,
 	)
 
-	controller := pokerrunde.NewRestController(pokerrunde.NewRepository())
+	controller := pokerrunde.NewRestController(s.repo)
 
 	router.Route("/v1", func(r chi.Router) {
 		r.Use(
@@ -46,7 +50,12 @@ func Routes() *chi.Mux {
 }
 
 func main() {
-	router := Routes()
+	server := Server{}
+	server.repo = pokerrunde.NewRepository()
+
+	go server.Tasks()
+
+	router := server.Routes()
 
 	if err := chi.Walk(router, printAllRoutes); err != nil {
 		log.Panicln(err)
@@ -56,8 +65,24 @@ func main() {
 	if !ok {
 		port = "8080"
 	}
+
 	log.Printf("Starting on port: %s", port)
 	log.Fatal(http.ListenAndServe(":"+port, router))
+}
+
+func (s *Server) Tasks() {
+	cleanTicker := time.NewTicker(time.Minute)
+	for {
+		select {
+		case <-cleanTicker.C:
+			t := time.Now().Add(-24 * time.Hour)
+			log.Printf(
+				"Pokerrunden erstellt vor %s werden jetzt gelöscht",
+				t.String(),
+			)
+			s.repo.RemoveAllErstelltVor(t)
+		}
+	}
 }
 
 func printAllRoutes(method string, route string, handler http.Handler, middlewares ...func(http.Handler) http.Handler) error {

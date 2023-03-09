@@ -1,8 +1,12 @@
 package pokerrunde
 
+import "time"
+
 // Pokerrunde ist eine Session für eine Planning Poker
 type Pokerrunde struct {
-	ID          string      `json:"id"`
+	ID          string `json:"id"`
+	ErstellZeit time.Time
+
 	Mitspieler  []Spieler   `json:"mitspieler"`
 	KartenWerte []KarteWert `json:"kartenwerte"`
 }

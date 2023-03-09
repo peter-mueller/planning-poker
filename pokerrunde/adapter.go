@@ -35,6 +35,7 @@ func (c *RESTController) Routes() *chi.Mux {
 // GetAPokerrunde liefert eine konkrete Pokerrunde für die Anzeige
 func (c *RESTController) GetAPokerrunde(w http.ResponseWriter, r *http.Request) {
 	rundeID := chi.URLParam(r, "rundeID")
+
 	spielrunde, ok := c.repo.FindByID(rundeID)
 	if !ok {
 		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
@@ -50,21 +51,24 @@ func (p Pokerrunde) Bind(r *http.Request) error {
 
 // PostAPokerrunde erstellt eine neue Runde
 func (c *RESTController) PostAPokerrunde(w http.ResponseWriter, r *http.Request) {
-	spielrunde := Pokerrunde{}
-	err := render.Bind(r, &spielrunde)
+	p := Pokerrunde{}
+	err := render.Bind(r, &p)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	// Leere Spielrunde erstellen
-	spielrunde.ID = uuid.NewString()
-	spielrunde.Mitspieler = []Spieler{}
-	spielrunde.KartenWerte = DefaultKartenWerte
+	p.Mitspieler = []Spieler{}
+	p.KartenWerte = DefaultKartenWerte
 
-	c.repo.Save(spielrunde)
+	p, err = c.repo.Create(p)
+	if err != nil {
+		http.Error(w, "Unbekannter Fehler beim erstellen", http.StatusInternalServerError)
+		return
+	}
 
-	render.JSON(w, r, spielrunde)
+	render.JSON(w, r, p)
 }
 
 func (s Spieler) Bind(r *http.Request) error {
@@ -81,7 +85,7 @@ func (c *RESTController) PostAMitspieler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	pokerrunde, ok := c.repo.FindByID(rundeID)
+	p, ok := c.repo.FindByID(rundeID)
 	if !ok {
 		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 		return
@@ -91,9 +95,20 @@ func (c *RESTController) PostAMitspieler(w http.ResponseWriter, r *http.Request)
 	// sie wird mit default werten angelegt
 	mitspieler.ID = uuid.NewString()
 	mitspieler.Karte = Karte{Aufgedeckt: false, Wert: KarteWertUnbekannt}
-	pokerrunde.Mitspieler = append(pokerrunde.Mitspieler, mitspieler)
+	p.Mitspieler = append(p.Mitspieler, mitspieler)
 
-	c.repo.Save(pokerrunde)
+	_, err = c.repo.Update(p)
+	switch {
+	case err == ErrKeineID:
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	case err == ErrNotFound:
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	case err != nil:
+		http.Error(w, "pokerrunde konnte nicht akutalisiert werden", http.StatusInternalServerError)
+		return
+	}
 
 	render.JSON(w, r, mitspieler)
 }
@@ -118,18 +133,29 @@ func (c *RESTController) PutAKarteWert(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	spielrunde, ok := c.repo.FindByID(rundeID)
+	p, ok := c.repo.FindByID(rundeID)
 	if !ok {
 		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 		return
 	}
-	for i, spieler := range spielrunde.Mitspieler {
+	for i, spieler := range p.Mitspieler {
 		if spieler.ID == mitgliedID {
-			spielrunde.Mitspieler[i].Karte.Wert = wert
+			p.Mitspieler[i].Karte.Wert = wert
 		}
 	}
 
-	spielrunde = c.repo.Save(spielrunde)
+	p, err = c.repo.Update(p)
+	switch {
+	case err == ErrKeineID:
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	case err == ErrNotFound:
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	case err != nil:
+		http.Error(w, "pokerrunde konnte nicht akutalisiert werden", http.StatusInternalServerError)
+		return
+	}
 
 	render.JSON(w, r, wert)
 }
@@ -137,17 +163,28 @@ func (c *RESTController) PutAKarteWert(w http.ResponseWriter, r *http.Request) {
 // PostCommandAufdecken deckt alle Karten auf
 func (c *RESTController) PostCommandAufdecken(w http.ResponseWriter, r *http.Request) {
 	rundeID := chi.URLParam(r, "rundeID")
-	spielrunde, ok := c.repo.FindByID(rundeID)
+	p, ok := c.repo.FindByID(rundeID)
 	if !ok {
 		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 		return
 	}
 
-	for i := range spielrunde.Mitspieler {
-		spielrunde.Mitspieler[i].Karte.Aufgedeckt = true
+	for i := range p.Mitspieler {
+		p.Mitspieler[i].Karte.Aufgedeckt = true
 	}
 
-	spielrunde = c.repo.Save(spielrunde)
+	p, err := c.repo.Update(p)
+	switch {
+	case err == ErrKeineID:
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	case err == ErrNotFound:
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	case err != nil:
+		http.Error(w, "pokerrunde konnte nicht akutalisiert werden", http.StatusInternalServerError)
+		return
+	}
 
 	w.WriteHeader(http.StatusOK)
 }
@@ -155,19 +192,29 @@ func (c *RESTController) PostCommandAufdecken(w http.ResponseWriter, r *http.Req
 // PostCommandReset setzt alle Karten zurück
 func (c *RESTController) PostCommandReset(w http.ResponseWriter, r *http.Request) {
 	rundeID := chi.URLParam(r, "rundeID")
-	spielrunde, ok := c.repo.FindByID(rundeID)
+	p, ok := c.repo.FindByID(rundeID)
 	if !ok {
 		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 		return
 	}
 
-	for i := range spielrunde.Mitspieler {
-		spielrunde.Mitspieler[i].Karte.Aufgedeckt = false
-		spielrunde.Mitspieler[i].Karte.Wert = KarteWertUnbekannt
+	for i := range p.Mitspieler {
+		p.Mitspieler[i].Karte.Aufgedeckt = false
+		p.Mitspieler[i].Karte.Wert = KarteWertUnbekannt
 
 	}
 
-	spielrunde = c.repo.Save(spielrunde)
-
+	p, err := c.repo.Update(p)
+	switch {
+	case err == ErrKeineID:
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	case err == ErrNotFound:
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	case err != nil:
+		http.Error(w, "pokerrunde konnte nicht akutalisiert werden", http.StatusInternalServerError)
+		return
+	}
 	w.WriteHeader(http.StatusOK)
 }
